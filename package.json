@@ -1,0 +1,30 @@
+{
+  "name": "shoptest-e2e",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test --project=e2e",
+    "test:auth": "playwright test tests/auth.spec.ts --project=e2e",
+    "test:shop": "playwright test tests/shop.spec.ts --project=e2e",
+    "test:cart": "playwright test tests/cart.spec.ts --project=e2e",
+    "test:admin": "playwright test tests/admin.spec.ts --project=e2e",
+    "test:visual": "playwright test --project=visual",
+    "test:visual:update": "playwright test --project=visual --update-snapshots",
+    "test:responsive": "playwright test --project=responsive-mobile --project=responsive-tablet --project=responsive-desktop",
+    "test:responsive:mobile": "playwright test --project=responsive-mobile",
+    "test:responsive:tablet": "playwright test --project=responsive-tablet",
+    "test:responsive:desktop": "playwright test --project=responsive-desktop",
+    "test:responsive:update": "playwright test --project=responsive-mobile --project=responsive-tablet --project=responsive-desktop --update-snapshots",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "report:detail": "open detailed-report.html"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}
