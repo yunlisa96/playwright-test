@@ -249,7 +249,7 @@ function buildHtml(
 
   const testCards = tests.map((t, idx) => {
     const meta = getTestMeta(t.title, t.file, t.describePath, t.project);
-    const resultExplanation = explainResult(t.status, t.errorMessage);
+    const resultExplanation = explainResult(t.status, t.errorMessage, meta, t.annotations);
     const catalogSteps = meta.steps.map(s => `<li>${escapeHtml(s)}</li>`).join('');
     const executedSteps = t.steps.length
       ? t.steps.map(s => `<li class="executed">${escapeHtml(s)}</li>`).join('')

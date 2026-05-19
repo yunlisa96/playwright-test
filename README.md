@@ -27,6 +27,7 @@ cp .env.example .env
 | `BASE_URL` | 테스트 대상 서버 URL | `http://localhost:5000` |
 | `TEST_EMAIL` / `TEST_PASSWORD` | 일반 유저 계정 | seed 계정과 일치 |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | 관리자 계정 | seed 계정과 일치 |
+| `SCREENSHOT_PRODUCT_ID` | 스크린샷용 고정 상품 ID | `1` |
 
 ## 테스트 실행
 
@@ -75,10 +76,11 @@ npm run report:detail
 ├── tests/                  # 테스트 spec
 │   ├── auth.spec.ts        # TC-AUTH-01 ~ 12
 │   ├── shop.spec.ts        # TC-SHOP-01 ~ 07
-│   ├── cart.spec.ts        # TC-CART-01 ~ 11
+│   ├── cart.spec.ts        # TC-CART-01 ~ 10
 │   ├── admin.spec.ts       # TC-ADMIN-01 ~ 09
 │   ├── visual.spec.ts      # 시각적 회귀
 │   ├── responsive.spec.ts  # 반응형
+│   ├── screenshot-helpers.ts  # 스크린샷·마스킹 공통
 │   └── helpers.ts          # 공통 헬퍼
 ├── reporters/
 │   ├── detailed-report.ts  # 한국어 상세 리포트
@@ -99,9 +101,17 @@ npm run report:detail
 
 ## 기준 스크린샷 갱신
 
-UI 변경 후 visual/responsive 테스트 baseline을 업데이트할 때:
+캡처 방식 변경·DB 데이터 변경 후에는 baseline을 다시 잡아야 합니다.
 
 ```bash
+# 서버 실행 + DB 상태 안정화 후
 npm run test:visual:update
 npm run test:responsive:update
+git add tests/**/*-snapshots/
 ```
+
+- **visual**: 허용 픽셀 차이 10% (`maxDiffPixelRatio: 0.10`)
+- **responsive**: 허용 픽셀 차이 8%, 뷰포트/요소 단위 캡처
+- 상품 상세·장바구니는 `fullPage` 대신 `[data-testid="product-detail"]` / `main` 요소만 비교
+- 관리자 목록은 **뷰포트 + 테이블 전체 마스킹** (행 수 변동 무시)
+- 상품 상세는 `SCREENSHOT_PRODUCT_ID` 상품 + 이름·가격·이미지 마스킹

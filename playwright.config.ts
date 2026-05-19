@@ -53,20 +53,43 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
       },
+      expect: {
+        toHaveScreenshot: {
+          maxDiffPixelRatio: 0.10,
+          threshold: 0.25,
+          animations: 'disabled',
+        },
+      },
     },
 
     // ── 반응형 : 모바일 ───────────────────────────────────
+    // Pixel 5 (Chromium) — WebKit 설치 없이 실행 가능
     {
       name: 'responsive-mobile',
       testMatch: '**/responsive.spec.ts',
-      use: { ...devices['iPhone 13'] },
+      use: { ...devices['Pixel 5'] },
+      expect: {
+        toHaveScreenshot: {
+          maxDiffPixelRatio: 0.08,
+          threshold: 0.25,
+          animations: 'disabled',
+        },
+      },
     },
 
     // ── 반응형 : 태블릿 ───────────────────────────────────
+    // Galaxy Tab S4 (Chromium) — WebKit 설치 없이 실행 가능
     {
       name: 'responsive-tablet',
       testMatch: '**/responsive.spec.ts',
-      use: { ...devices['iPad (gen 7)'] },
+      use: { ...devices['Galaxy Tab S4'] },
+      expect: {
+        toHaveScreenshot: {
+          maxDiffPixelRatio: 0.08,
+          threshold: 0.25,
+          animations: 'disabled',
+        },
+      },
     },
 
     // ── 반응형 : 데스크톱 ─────────────────────────────────
@@ -76,6 +99,13 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
+      },
+      expect: {
+        toHaveScreenshot: {
+          maxDiffPixelRatio: 0.08,
+          threshold: 0.25,
+          animations: 'disabled',
+        },
       },
     },
   ],

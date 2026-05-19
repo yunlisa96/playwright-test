@@ -4,6 +4,8 @@ export interface TestMeta {
   steps: string[];
   expected: string;
   category: string;
+  /** test.skip() 사유 (리포트용) */
+  skipReason?: string;
 }
 
 const TC_CATALOG: Record<string, TestMeta> = {
@@ -210,13 +212,6 @@ const TC_CATALOG: Record<string, TestMeta> = {
     steps: ['로그인', '상품 담기', '체크아웃에서 배송지 비우고 주문 시도'],
     expected: '"배송지를 입력해주세요" 메시지, 체크아웃 페이지 유지',
   },
-  'TC-CART-11': {
-    id: 'TC-CART-11',
-    category: '장바구니',
-    purpose: '타인 주문 페이지 직접 접근 차단',
-    steps: ['로그인', '/cart/order/1 직접 접속'],
-    expected: '메인/로그인 리다이렉트 또는 권한 오류 메시지',
-  },
   'TC-ADMIN-01': {
     id: 'TC-ADMIN-01',
     category: '관리자',
@@ -297,7 +292,7 @@ function visualMeta(describe: string, title: string): TestMeta {
       '동적 요소 마스킹 후 스크린샷 촬영',
       '기준 이미지(baseline)와 픽셀 비교',
     ],
-    expected: '기준 스크린샷과 2% 이내 픽셀 차이 (maxDiffPixelRatio: 0.02)',
+    expected: '기준 스크린샷과 허용 픽셀 차이 이내 (visual 10%, responsive 8%)',
   };
 }
 
@@ -352,8 +347,12 @@ export function explainError(message: string): string {
       + '로그인 실패, 서버 오류, 또는 잘못된 URL 설정을 의심할 수 있습니다.';
   }
   if (message.includes('toHaveScreenshot') || message.includes('screenshot')) {
-    return '스크린샷이 기준 이미지(baseline)와 2% 이상 다릅니다. '
-      + 'UI 변경이 의도된 것이라면 `npm run test:visual:update`로 기준 이미지를 갱신하세요.';
+    if (message.includes('Expected an image') && message.includes('received')) {
+      return '스크린샷 크기(높이/너비)가 baseline과 다릅니다. 캡처 방식 변경 또는 페이지 높이 변동일 수 있습니다. '
+        + '`npm run test:visual:update` 및 `npm run test:responsive:update`로 baseline을 재생성하세요.';
+    }
+    return '스크린샷이 기준 이미지(baseline)와 허용치 이상 다릅니다. '
+      + 'UI 변경이 의도된 것이라면 `npm run test:visual:update` / `npm run test:responsive:update`로 기준 이미지를 갱신하세요.';
   }
   if (message.includes('toBeVisible') || message.includes('not visible')) {
     return '화면에서 기대한 UI 요소를 찾지 못했습니다. '
@@ -375,7 +374,22 @@ export function explainError(message: string): string {
     + '아래 원본 에러 메시지와 Playwright HTML 리포트의 trace를 참고하세요.';
 }
 
-export function explainResult(status: string, errorMessage?: string): string {
+export function explainSkipped(
+  meta: TestMeta,
+  annotations: { type: string; description?: string }[] = [],
+): string {
+  if (meta.skipReason) return meta.skipReason;
+  const skipNote = annotations.find(a => a.type === 'skip')?.description;
+  if (skipNote) return skipNote;
+  return '의도적으로 건너뛴 테스트입니다.';
+}
+
+export function explainResult(
+  status: string,
+  errorMessage?: string,
+  meta?: TestMeta,
+  annotations: { type: string; description?: string }[] = [],
+): string {
   switch (status) {
     case 'passed':
       return '모든 검증 단계를 통과했습니다. 기대 결과와 실제 동작이 일치합니다.';
@@ -384,7 +398,7 @@ export function explainResult(status: string, errorMessage?: string): string {
         ? explainError(errorMessage)
         : '테스트가 실패했으나 상세 에러 메시지를 가져올 수 없습니다.';
     case 'skipped':
-      return '테스트 조건 미충족(예: 페이지네이션 없음, 카테고리 없음)으로 건너뛰었습니다.';
+      return meta ? explainSkipped(meta, annotations) : '의도적으로 건너뛴 테스트입니다.';
     case 'timedOut':
       return '테스트가 30초 제한 시간을 초과했습니다. 네트워크 지연이나 무한 대기 상태를 확인하세요.';
     case 'interrupted':

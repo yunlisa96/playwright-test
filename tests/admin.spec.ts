@@ -17,8 +17,9 @@ test.describe('관리자 - 접근 제어', () => {
 
   test('TC-ADMIN-01 | 일반 유저의 관리자 페이지 접근 차단', async ({ page }) => {
     await loginAsUser(page);
-    await page.goto('/admin');
-    await expect(page).toHaveURL('/');
+    await page.goto('/admin', { waitUntil: 'domcontentloaded' });
+    // 서버가 안내 메시지 후 `/` 로 리다이렉트할 때까지 대기
+    await page.waitForURL('/', { timeout: 10_000 });
     expect(await getFlashText(page)).toContain('관리자만 접근할 수 있습니다');
   });
 });
